@@ -20,22 +20,22 @@ GPT_ALL_MODELS = GPT_3_MODELS + GPT_4_MODELS + GPT_4_32K_MODELS
 
 def default_max_tokens(model: str) -> int:
     """
-    Gets the default number of max tokens for the given model.
-    :param model: The model name
-    :return: The default number of max tokens
+    Получает количество максимальных лексем по умолчанию для данной модели.
+    :param model: Имя модели
+    :return: Число максимальных лексем по умолчанию
     """
     return 1200 if model in GPT_3_MODELS else 2400
 
 
 class OpenAIHelper:
     """
-    ChatGPT helper class.
+    Вспомогательный класс ChatGPT.
     """
 
     def __init__(self, config: dict):
         """
-        Initializes the OpenAI helper class with the given configuration.
-        :param config: A dictionary containing the GPT configuration
+        Инициализирует класс-помощник OpenAI с заданной конфигурацией.
+        :param config: Словарь, содержащий конфигурацию GPT
         """
         openai.api_key = config['api_key']
         openai.proxy = config['proxy']
@@ -45,9 +45,9 @@ class OpenAIHelper:
 
     def get_conversation_stats(self, chat_id: int) -> tuple[int, int]:
         """
-        Gets the number of messages and tokens used in the conversation.
-        :param chat_id: The chat ID
-        :return: A tuple containing the number of messages and tokens used
+        Получает количество сообщений и токенов, использованных в разговоре.
+        :param chat_id: ID чата
+        :return: Кортеж, содержащий количество использованных сообщений и токенов.
         """
         if chat_id not in self.conversations:
             self.reset_chat_history(chat_id)
@@ -55,10 +55,10 @@ class OpenAIHelper:
 
     async def get_chat_response(self, chat_id: int, query: str) -> tuple[str, str]:
         """
-        Gets a full response from the GPT model.
-        :param chat_id: The chat ID
-        :param query: The query to send to the model
-        :return: The answer from the model and the number of tokens used
+        Получает полный ответ от модели GPT.
+        :param chat_id: ID чата
+        :param query: Запрос, который нужно отправить в модель
+        :return: Ответ от модели и количество использованных токенов
         """
         response = await self.__common_get_chat_response(chat_id, query)
         answer = ''
@@ -85,10 +85,10 @@ class OpenAIHelper:
 
     async def get_chat_response_stream(self, chat_id: int, query: str):
         """
-        Stream response from the GPT model.
-        :param chat_id: The chat ID
-        :param query: The query to send to the model
-        :return: The answer from the model and the number of tokens used, or 'not_finished'
+        Потоковый ответ от модели GPT.
+        :param chat_id: ID чата
+        :param query: Запрос, который нужно отправить в модель
+        :return: Ответ от модели и количество использованных токенов, или 'not_finished'.
         """
         response = await self.__common_get_chat_response(chat_id, query, stream=True)
 
@@ -105,16 +105,16 @@ class OpenAIHelper:
         tokens_used = str(self.__count_tokens(self.conversations[chat_id]))
 
         if self.config['show_usage']:
-            answer += f"\n\n---\n💰 Tokens used: {tokens_used}"
+            answer += f"\n\n---\n💰 Используемые токены: {tokens_used}"
 
         yield answer, tokens_used
 
     async def __common_get_chat_response(self, chat_id: int, query: str, stream=False):
         """
-        Request a response from the GPT model.
-        :param chat_id: The chat ID
-        :param query: The query to send to the model
-        :return: The answer from the model and the number of tokens used
+        Запрос ответа от модели GPT.
+        :param chat_id: ID чата
+        :param query: Запрос, который нужно отправить в модель
+        :return: Ответ от модели и количество использованных токенов
         """
         try:
             if chat_id not in self.conversations or self.__max_age_reached(chat_id):
@@ -130,7 +130,7 @@ class OpenAIHelper:
             exceeded_max_history_size = len(self.conversations[chat_id]) > self.config['max_history_size']
 
             if exceeded_max_tokens or exceeded_max_history_size:
-                logging.info(f'Chat history for chat ID {chat_id} is too long. Summarising...')
+                logging.info(f'История чата для чата ID {chat_id} слишком длинный. Подведение итогов...')
                 try:
                     summary = await self.__summarise(self.conversations[chat_id][:-1])
                     logging.debug(f'Summary: {summary}')
@@ -138,7 +138,7 @@ class OpenAIHelper:
                     self.__add_to_history(chat_id, role="assistant", content=summary)
                     self.__add_to_history(chat_id, role="user", content=query)
                 except Exception as e:
-                    logging.warning(f'Error while summarising chat history: {str(e)}. Popping elements instead...')
+                    logging.warning(f'Ошибка при подведении итогов истории чатов: {str(e)}. Выскакивающие элементы вместо...')
                     self.conversations[chat_id] = self.conversations[chat_id][-self.config['max_history_size']:]
 
             return await openai.ChatCompletion.acreate(
@@ -153,19 +153,19 @@ class OpenAIHelper:
             )
 
         except openai.error.RateLimitError as e:
-            raise Exception(f'⚠️ _OpenAI Rate Limit exceeded_ ⚠️\n{str(e)}') from e
+            raise Exception(f'⚠️ _Превышен лимит скорости OpenAI_ ⚠️\n{str(e)}') from e
 
         except openai.error.InvalidRequestError as e:
-            raise Exception(f'⚠️ _OpenAI Invalid request_ ⚠️\n{str(e)}') from e
+            raise Exception(f'⚠️ _OpenAI Неверный запрос_ ⚠️\n{str(e)}') from e
 
         except Exception as e:
-            raise Exception(f'⚠️ _An error has occurred_ ⚠️\n{str(e)}') from e
+            raise Exception(f'⚠️ _Произошла ошибка_ ⚠️\n{str(e)}') from e
 
     async def generate_image(self, prompt: str) -> tuple[str, str]:
         """
-        Generates an image from the given prompt using DALL·E model.
-        :param prompt: The prompt to send to the model
-        :return: The image URL and the image size
+        Генерирует изображение по заданному запросу, используя модель DALL-E.
+        :param prompt: Подсказка, которую нужно отправить в модель
+        :return: URL изображения и его размер
         """
         try:
             response = await openai.Image.acreate(
@@ -175,16 +175,16 @@ class OpenAIHelper:
             )
 
             if 'data' not in response or len(response['data']) == 0:
-                logging.error(f'No response from GPT: {str(response)}')
-                raise Exception('⚠️ _An error has occurred_ ⚠️\nPlease try again in a while.')
+                logging.error(f'Нет ответа от GPT: {str(response)}')
+                raise Exception('⚠️ _Произошла ошибка_ ⚠️\nПожалуйста, повторите попытку через некоторое время.')
 
             return response['data'][0]['url'], self.config['image_size']
         except Exception as e:
-            raise Exception(f'⚠️ _An error has occurred_ ⚠️\n{str(e)}') from e
+            raise Exception(f'⚠️ _Произошла ошибка_ ⚠️\n{str(e)}') from e
 
     async def transcribe(self, filename):
         """
-        Transcribes the audio file using the Whisper model.
+        Транскрибирует аудиофайл, используя модель Whisper.
         """
         try:
             with open(filename, "rb") as audio:
@@ -192,11 +192,11 @@ class OpenAIHelper:
                 return result.text
         except Exception as e:
             logging.exception(e)
-            raise Exception(f'⚠️ _An error has occurred_ ⚠️\n{str(e)}') from e
+            raise Exception(f'⚠️ _Произошла ошибка_ ⚠️\n{str(e)}') from e
 
     def reset_chat_history(self, chat_id, content=''):
         """
-        Resets the conversation history.
+        Сброс истории разговоров.
         """
         if content == '':
             content = self.config['assistant_prompt']
@@ -204,9 +204,9 @@ class OpenAIHelper:
 
     def __max_age_reached(self, chat_id) -> bool:
         """
-        Checks if the maximum conversation age has been reached.
-        :param chat_id: The chat ID
-        :return: A boolean indicating whether the maximum conversation age has been reached
+        Проверяет, достигнут ли максимальный возраст разговора.
+        :param chat_id: ID чата
+        :return: Булево значение, указывающее, был ли достигнут максимальный возраст беседы.
         """
         if chat_id not in self.last_updated:
             return False
@@ -217,21 +217,21 @@ class OpenAIHelper:
 
     def __add_to_history(self, chat_id, role, content):
         """
-        Adds a message to the conversation history.
-        :param chat_id: The chat ID
-        :param role: The role of the message sender
-        :param content: The message content
+        Добавляет сообщение в историю разговора.
+        :param chat_id: ID чата
+        :param role: Роль отправителя сообщения
+        :param content: Содержание сообщения
         """
         self.conversations[chat_id].append({"role": role, "content": content})
 
     async def __summarise(self, conversation) -> str:
         """
-        Summarises the conversation history.
-        :param conversation: The conversation history
-        :return: The summary
+        Обобщает историю разговора.
+        :param conversation: История разговора
+        :return: Краткое содержание
         """
         messages = [
-            { "role": "assistant", "content": "Summarize this conversation in 700 characters or less" },
+            { "role": "assistant", "content": "Кратко опишите этот разговор в 700 символах или меньше" },
             { "role": "user", "content": str(conversation) }
         ]
         response = await openai.ChatCompletion.acreate(
@@ -249,15 +249,15 @@ class OpenAIHelper:
         if self.config['model'] in GPT_4_32K_MODELS:
             return 32768
         raise NotImplementedError(
-            f"Max tokens for model {self.config['model']} is not implemented yet."
+            f"Максимальное количество токенов для модели {self.config['model']} пока не реализована."
         )
 
     # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
     def __count_tokens(self, messages) -> int:
         """
-        Counts the number of tokens required to send the given messages.
-        :param messages: the messages to send
-        :return: the number of tokens required
+        Подсчитывает количество токенов, необходимых для отправки заданных сообщений.
+        :param messages: сообщения для отправки
+        :return: количество необходимых жетонов
         """
         try:
             model = self.config['model']
@@ -272,7 +272,7 @@ class OpenAIHelper:
             tokens_per_message = 3
             tokens_per_name = 1
         else:
-            raise NotImplementedError(f"""num_tokens_from_messages() is not implemented for model {model}.""")
+            raise NotImplementedError(f"""num_tokens_from_messages() не реализована для модели {model}.""")
         num_tokens = 0
         for message in messages:
             num_tokens += tokens_per_message
@@ -284,9 +284,9 @@ class OpenAIHelper:
         return num_tokens
     
     def get_billing_current_month(self):
-        """Gets billed usage for current month from OpenAI API.
+        """Получает из API OpenAI данные об использовании в текущем месяце.
 
-        :return: dollar amount of usage this month
+        :return: долларовая сумма использования в текущем месяце
         """
         headers = {
             "Authorization": f"Bearer {openai.api_key}"

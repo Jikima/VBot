@@ -79,7 +79,7 @@ class ChatGPTTelegramBot:
         """
         commands = self.group_commands if self.is_group_chat(update) else self.commands
         commands_description = [f'/{command.command} - {command.description}' for command in commands]
-        help_text = 'Привет, дружище! Могу сказать, что ты выглядишь отлично! Меня зовут Виктор и я готов оказать вам любую необходимую помощь. Так что, , напиши чем тебе помочь?'                   
+        help_text = 'Привет, дружище! Могу сказать, что ты выглядишь отлично! Меня зовут Виктор и я готов оказать вам любую необходимую помощь. Так что, {{catchall.user_first_name}}, напиши чем тебе помочь?'                   
         await update.message.reply_text(help_text, disable_web_page_preview=True)
     async def stats(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """

@@ -19,7 +19,7 @@ from usage_tracker import UsageTracker
 
 def message_text(message: Message) -> str:
     """
-    Returns the text of a message, excluding any bot commands.
+    Возвращает текст сообщения, исключая любые команды бота.
     """
     message_text = message.text
     if message_text is None:
@@ -33,7 +33,7 @@ def message_text(message: Message) -> str:
 
 class ChatGPTTelegramBot:
     """
-    Class representing a ChatGPT Telegram Bot.
+    Класс, представляющий Telegram-бота ChatGPT.
     """
     # Mapping of budget period to cost period
     budget_cost_map = {
@@ -50,14 +50,14 @@ class ChatGPTTelegramBot:
 
     def __init__(self, config: dict, openai: OpenAIHelper):
         """
-        Initializes the bot with the given configuration and GPT bot object.
-        :param config: A dictionary containing the bot configuration
-        :param openai: OpenAIHelper object
+        Инициализирует бота с заданной конфигурацией и объектом бота GPT.
+        :param config: Словарь, содержащий конфигурацию бота
+        :param openai: Объект OpenAIHelper
         """
         self.config = config
         self.openai = openai
         self.commands = [
-            BotCommand(command='help', description='Show help message'),
+            BotCommand(command='help', description='Показать сообщение справки'),
             BotCommand(command='reset', description='Reset the conversation. Optionally pass high-level instructions '
                                                     '(e.g. /reset You are a helpful assistant)'),
             BotCommand(command='image', description='Generate image from prompt (e.g. /image cat)'),

@@ -9,10 +9,10 @@ def year_month(date):
 
 class UsageTracker:
     """
-    UsageTracker class
-    Enables tracking of daily/monthly usage per user.
-    User files are stored as JSON in /usage_logs directory.
-    JSON example:
+    Класс UsageTracker
+    Позволяет отслеживать ежедневное/ежемесячное использование для каждого пользователя.
+    Файлы пользователей хранятся в виде JSON в каталоге /usage_logs.
+    Пример JSON:
     {
         "user_name": "@user_name",
         "current_cost": {
@@ -40,11 +40,11 @@ class UsageTracker:
 
     def __init__(self, user_id, user_name, logs_dir="usage_logs"):
         """
-        Initializes UsageTracker for a user with current date.
-        Loads usage data from usage log file.
-        :param user_id: Telegram ID of the user
-        :param user_name: Telegram user name
-        :param logs_dir: path to directory of usage logs, defaults to "usage_logs"
+        Инициализирует UsageTracker для пользователя с текущей датой.
+        Загружает данные об использовании из файла журнала использования.
+        :param user_id: Telegram ID пользователя
+        :param user_name: имя пользователя Telegram
+        :param logs_dir: путь к директории журналов использования, по умолчанию "usage_logs".
         """
         self.user_id = user_id
         self.logs_dir = logs_dir
@@ -67,9 +67,9 @@ class UsageTracker:
     # token usage functions:
 
     def add_chat_tokens(self, tokens, tokens_price=0.002):
-        """Adds used tokens from a request to a users usage history and updates current cost-
-        :param tokens: total tokens used in last request
-        :param tokens_price: price per 1000 tokens, defaults to 0.002
+        """Добавляет использованные токены из запроса в историю использования пользователя и обновляет текущую стоимость.
+        :param tokens: общее количество токенов, использованных в последнем запросе
+        :param tokens_price: цена за 1000 токенов, по умолчанию 0.002
         """
         today = date.today()
         last_update = date.fromisoformat(self.usage["current_cost"]["last_update"])
@@ -100,9 +100,9 @@ class UsageTracker:
             json.dump(self.usage, outfile)
 
     def get_current_token_usage(self):
-        """Get token amounts used for today and this month
+        """Получить количество токенов, использованных за сегодня и за месяц
 
-        :return: total number of tokens used per day and per month
+        :return: общее количество токенов, использованных за день и за месяц
         """
         today = date.today()
         if str(today) in self.usage["usage_history"]["chat_tokens"]:
@@ -119,11 +119,11 @@ class UsageTracker:
     # image usage functions:
 
     def add_image_request(self, image_size, image_prices="0.016,0.018,0.02"):
-        """Add image request to users usage history and update current costs.
+        """Добавляет запрос изображения в историю использования пользователями и обновляет текущие расходы.
 
-        :param image_size: requested image size
-        :param image_prices: prices for images of sizes ["256x256", "512x512", "1024x1024"],
-                             defaults to [0.016, 0.018, 0.02]
+        :param image_size: размер запрашиваемого изображения
+        :param image_prices: цены для изображений размеров ["256x256", "512x512", "1024x1024"],
+                             по умолчанию [0.016, 0.018, 0.02]
         """
         sizes = ["256x256", "512x512", "1024x1024"]
         requested_size = sizes.index(image_size)
@@ -159,9 +159,9 @@ class UsageTracker:
             json.dump(self.usage, outfile)
 
     def get_current_image_count(self):
-        """Get number of images requested for today and this month.
+        """Получить количество изображений, запрошенных за сегодня и за месяц.
 
-        :return: total number of images requested per day and per month
+        :return: общее количество изображений, запрошенных за день и за месяц
         """
         today=date.today()
         if str(today) in self.usage["usage_history"]["number_images"]:
@@ -178,9 +178,9 @@ class UsageTracker:
     # transcription usage functions:
 
     def add_transcription_seconds(self, seconds, minute_price=0.006):
-        """Adds requested transcription seconds to a users usage history and updates current cost.
-        :param tokens: total tokens used in last request
-        :param tokens_price: price per minute transcription, defaults to 0.006
+        """Добавляет запрошенные транскрипционные секунды в историю использования пользователя и обновляет текущую стоимость.
+        :param tokens: общее количество токенов, использованных в последнем запросе
+        :param tokens_price: цена за минуту транскрипции, по умолчанию 0.006
         """
         today = date.today()
         last_update = date.fromisoformat(self.usage["current_cost"]["last_update"])
@@ -212,9 +212,9 @@ class UsageTracker:
             json.dump(self.usage, outfile)
 
     def get_current_transcription_duration(self):
-        """Get minutes and seconds of audio transcribed for today and this month.
+        """Получает минуты и секунды аудиозаписи за сегодня и за месяц.
 
-        :return: total amount of time transcribed per day and per month (4 values)
+        :return: общее количество времени, транскрибированного за день и за месяц (4 значения)
         """
         today = date.today()
         if str(today) in self.usage["usage_history"]["transcription_seconds"]:
@@ -232,9 +232,9 @@ class UsageTracker:
     
     # general functions
     def get_current_cost(self):
-        """Get total USD amount of all requests of the current day and month
+        """Получить общую сумму в USD по всем запросам текущего дня и месяца
 
-        :return: cost of current day and month
+        :return: стоимость текущего дня и месяца
         """
         today = date.today()
         last_update = date.fromisoformat(self.usage["current_cost"]["last_update"])
@@ -252,13 +252,13 @@ class UsageTracker:
         return {"cost_today": cost_day, "cost_month": cost_month, "cost_all_time": cost_all_time}
 
     def initialize_all_time_cost(self, tokens_price=0.002, image_prices="0.016,0.018,0.02", minute_price=0.006):
-        """Get total USD amount of all requests in history
+        """Получение общей суммы в USD по всем запросам в истории
         
-        :param tokens_price: price per 1000 tokens, defaults to 0.002
-        :param image_prices: prices for images of sizes ["256x256", "512x512", "1024x1024"],
-            defaults to [0.016, 0.018, 0.02]
-        :param tokens_price: price per minute transcription, defaults to 0.006
-        :return: total cost of all requests
+        :param tokens_price: цена за 1000 токенов, по умолчанию 0.002
+        :param image_prices: цены для изображений размеров ["256x256", "512x512", "1024x1024"],
+            по умолчанию [0.016, 0.018, 0.02]
+        :param tokens_price: цена за минуту транскрипции, по умолчанию 0.006
+        :return: общая стоимость всех запросов
         """
         total_tokens = sum(self.usage['usage_history']['chat_tokens'].values())
         token_cost = round(total_tokens * tokens_price / 1000, 6)
